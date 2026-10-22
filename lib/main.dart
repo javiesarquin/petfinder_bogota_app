@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -11,38 +10,29 @@ class PetFinderApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'PetFinder Bogotá',
+      title: 'PetFinder Bogotá Pro',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        primarySwatch: Colors.teal,
         useMaterial3: true,
-        scaffoldBackgroundColor: const Color(0xFFF8FAFC),
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF0D9488),
-          primary: const Color(0xFF0D9488),
+        brightness: Brightness.dark,
+        scaffoldBackgroundColor: const Color(0xFF090D16),
+        colorScheme: const ColorScheme.dark(
+          primary: Color(0xFF0EA5E9),
+          secondary: Color(0xFF10B981),
+          surface: Color(0xFF131C2E),
         ),
       ),
-      home: const LoginScreen(),
+      home: const AuthenticationScreen(),
     );
   }
 }
 
 // ============================================================================
-// MODELOS DE DATOS DETALLADOS Y PROFESIONALES
+// MODELOS DE DATOS Y PERFILES
 // ============================================================================
-
-class RoutePoint {
-  final String title;
-  final String time;
-  final IconData icon;
-  final Color color;
-
-  RoutePoint({required this.title, required this.time, required this.icon, required this.color});
-}
-
-class UserModel {
+class PetProfile {
   final String id;
-  final String name;
+  final String ownerName;
   final String email;
   final String phone;
   final String petName;
@@ -53,19 +43,18 @@ class UserModel {
   final String color;
   final String gender;
   final bool isVaccinated;
-  final String gpsId;
+  final String gpsHardwareId;
   final int batteryLevel;
-  final double initialLat;
-  final double initialLng;
-  final String locationName;
-  final String distance;
-  final String duration;
-  final String pointCount;
-  final List<RoutePoint> routePoints;
+  final String lastSeenZone;
+  final String coordsText;
+  final double lat;
+  final double lng;
+  final int mapType; // 0: Zona T/Norte, 1: Chapinero Alto, 2: Parque Simón Bolívar
+  final List<Offset> routePoints;
 
-  UserModel({
+  PetProfile({
     required this.id,
-    required this.name,
+    required this.ownerName,
     required this.email,
     required this.phone,
     required this.petName,
@@ -76,404 +65,264 @@ class UserModel {
     required this.color,
     required this.gender,
     required this.isVaccinated,
-    required this.gpsId,
+    required this.gpsHardwareId,
     required this.batteryLevel,
-    required this.initialLat,
-    required this.initialLng,
-    required this.locationName,
-    required this.distance,
-    required this.duration,
-    required this.pointCount,
+    required this.lastSeenZone,
+    required this.coordsText,
+    required this.lat,
+    required this.lng,
+    required this.mapType,
     required this.routePoints,
   });
 }
 
-// ============================================================================
-// PANTALLA 1: LOGIN PROFESIONAL CON CAMPOS LIMPIOS
-// ============================================================================
+final List<PetProfile> samplePets = [
+  PetProfile(
+    id: 'P001',
+    ownerName: 'Junior Rengifo',
+    email: 'junior.rengifo@ecci.edu.co',
+    phone: '+57 310 987 6543',
+    petName: 'Hades',
+    petType: 'Canino',
+    breed: 'Golden Retriever',
+    age: '2 años y 4 meses',
+    weight: '28.0 kg',
+    color: 'Negro',
+    gender: 'Macho',
+    isVaccinated: true,
+    gpsHardwareId: 'GPS-BOG-9921',
+    batteryLevel: 92,
+    lastSeenZone: 'Zona T / Zona Rosa (Calle 82 # 11-30)',
+    coordsText: '4.6664° N, 74.0531° W',
+    lat: 4.6664,
+    lng: -74.0531,
+    mapType: 0,
+    routePoints: const [
+      Offset(0.20, 0.25),
+      Offset(0.35, 0.28),
+      Offset(0.45, 0.50),
+      Offset(0.60, 0.52),
+      Offset(0.75, 0.70),
+    ],
+  ),
+  PetProfile(
+    id: 'P002',
+    ownerName: 'Marta Gómez',
+    email: 'marta.gomez@petfinder.co',
+    phone: '+57 315 222 1100',
+    petName: 'Michi',
+    petType: 'Felino',
+    breed: 'Siamés',
+    age: '1 año y 8 meses',
+    weight: '4.2 kg',
+    color: 'Crema / Puntos Oscuros',
+    gender: 'Macho',
+    isVaccinated: true,
+    gpsHardwareId: 'GPS-BOG-4012',
+    batteryLevel: 58,
+    lastSeenZone: 'Chapinero Alto (Calle 57 # 4-12)',
+    coordsText: '4.6486° N, 74.0628° W',
+    lat: 4.6486,
+    lng: -74.0628,
+    mapType: 1,
+    routePoints: const [
+      Offset(0.80, 0.15),
+      Offset(0.65, 0.30),
+      Offset(0.50, 0.45),
+      Offset(0.35, 0.70),
+    ],
+  ),
+  PetProfile(
+    id: 'P003',
+    ownerName: 'Carolina Palacios',
+    email: 'carolina.p@petfinder.co',
+    phone: '+57 300 444 8899',
+    petName: 'Thor',
+    petType: 'Canino',
+    breed: 'Pastor Alemán',
+    age: '3 años',
+    weight: '34.0 kg',
+    color: 'Negro Fuego',
+    gender: 'Macho',
+    isVaccinated: false,
+    gpsHardwareId: 'GPS-BOG-1189',
+    batteryLevel: 18,
+    lastSeenZone: 'Parque Simón Bolívar (Av. Cll 63)',
+    coordsText: '4.6581° N, 74.0935° W',
+    lat: 4.6581,
+    lng: -74.0935,
+    mapType: 2,
+    routePoints: const [
+      Offset(0.15, 0.80),
+      Offset(0.30, 0.65),
+      Offset(0.50, 0.50),
+      Offset(0.65, 0.35),
+    ],
+  ),
+];
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+// ============================================================================
+// PANTALLA 1: AUTENTICACIÓN / LOGIN
+// ============================================================================
+class AuthenticationScreen extends StatefulWidget {
+  const AuthenticationScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<AuthenticationScreen> createState() => _AuthenticationScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-  bool _obscurePassword = true;
+class _AuthenticationScreenState extends State<AuthenticationScreen> {
+  int _selectedUserIdx = 0;
+  final TextEditingController _passController = TextEditingController(text: '123456');
+  bool _isLoading = false;
 
-  final List<UserModel> _demoUsers = [
-    UserModel(
-      id: 'U1',
-      name: 'Junior Rengifo (User Persona)',
-      email: 'junior.rengifo@ecci.edu.co',
-      phone: '+57 310 555 0192',
-      petName: 'Hades',
-      petType: 'Canino',
-      breed: 'Golden Retriever',
-      age: '3 años',
-      weight: '28.5 kg',
-      color: 'Negro',
-      gender: 'Macho (Esterilizado)',
-      isVaccinated: true,
-      gpsId: 'GPS-BOG-991',
-      batteryLevel: 88,
-      initialLat: 4.6730,
-      initialLng: -74.0535,
-      locationName: 'Parque El Virrey, Bogotá D.C.',
-      distance: '3.4 km',
-      duration: '45 min',
-      pointCount: '128',
-      routePoints: [
-        RoutePoint(title: 'Inicio: Cll 85 # 11-02', time: '08:15 AM', icon: Icons.play_circle_fill, color: Colors.green),
-        RoutePoint(title: 'Pausa: Zona Canina El Virrey', time: '08:40 AM (15 min)', icon: Icons.pause_circle_filled, color: Colors.orange),
-        RoutePoint(title: 'Fin: Cra 15 # 88-20', time: '09:00 AM', icon: Icons.stop_circle, color: Colors.red),
-      ],
-    ),
-    UserModel(
-      id: 'U2',
-      name: 'Marta Gómez (U2)',
-      email: 'marta.gomez@gmail.com',
-      phone: '+57 315 444 8821',
-      petName: 'Michi',
-      petType: 'Felino',
-      breed: 'Siamés Tradicional',
-      age: '2 años',
-      weight: '4.2 kg',
-      color: 'Beige y Marrón Oscuro',
-      gender: 'Hembra',
-      isVaccinated: true,
-      gpsId: 'GPS-BOG-104',
-      batteryLevel: 64,
-      initialLat: 4.6580,
-      initialLng: -74.0930,
-      locationName: 'Parque Simón Bolívar, Bogotá D.C.',
-      distance: '1.2 km',
-      duration: '20 min',
-      pointCount: '54',
-      routePoints: [
-        RoutePoint(title: 'Inicio: Cll 53 # 60-10', time: '03:10 PM', icon: Icons.play_circle_fill, color: Colors.green),
-        RoutePoint(title: 'Recorrido Interior Simón Bolívar', time: '03:22 PM', icon: Icons.location_on, color: Colors.blue),
-        RoutePoint(title: 'Fin: Entorno Residencial Cll 53', time: '03:30 PM', icon: Icons.stop_circle, color: Colors.red),
-      ],
-    ),
-    UserModel(
-      id: 'U3',
-      name: 'Carolina Palacios (U3)',
-      email: 'carolina.p@gmail.com',
-      phone: '+57 300 123 9988',
-      petName: 'Rocky',
-      petType: 'Canino',
-      breed: 'Bulldog Francés',
-      age: '4 años',
-      weight: '12.0 kg',
-      color: 'Atigrado / Negro',
-      gender: 'Macho',
-      isVaccinated: true,
-      gpsId: 'GPS-BOG-402',
-      batteryLevel: 92,
-      initialLat: 4.6760,
-      initialLng: -74.0480,
-      locationName: 'Parque de la 93, Bogotá D.C.',
-      distance: '5.1 km',
-      duration: '1h 10 min',
-      pointCount: '210',
-      routePoints: [
-        RoutePoint(title: 'Inicio: Cll 93 # 13-08', time: '06:30 AM', icon: Icons.play_circle_fill, color: Colors.green),
-        RoutePoint(title: 'Pausa: Cafetería Pet Friendly', time: '07:10 AM (20 min)', icon: Icons.pause_circle_filled, color: Colors.orange),
-        RoutePoint(title: 'Fin: Cra 11 # 94-02', time: '07:40 AM', icon: Icons.stop_circle, color: Colors.red),
-      ],
-    ),
-  ];
+  void _login() async {
+    setState(() => _isLoading = true);
+    await Future.delayed(const Duration(milliseconds: 900));
+    if (!mounted) return;
+    setState(() => _isLoading = false);
 
-  void _login(UserModel user) {
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => MainNavigationScreen(currentUser: user)),
+      MaterialPageRoute(
+        builder: (context) => MainDashboardScreen(selectedPetIndex: _selectedUserIdx),
+      ),
     );
-  }
-
-  void _handleManualLogin() {
-    if (_emailController.text.trim().isEmpty || _passwordController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Por favor ingresa tu correo y contraseña.'),
-          backgroundColor: Colors.orange,
-        ),
-      );
-      return;
-    }
-    _login(_demoUsers[0]);
   }
 
   @override
   Widget build(BuildContext context) {
+    final pet = samplePets[_selectedUserIdx];
+
     return Scaffold(
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const SizedBox(height: 20),
-              Center(
-                child: Container(
-                  padding: const EdgeInsets.all(16),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Color(0xFF0F172A), Color(0xFF070A10)],
+          ),
+        ),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Spacer(),
+                // IsoTipo / Logo
+                Container(
+                  padding: const EdgeInsets.all(18),
                   decoration: BoxDecoration(
-                    color: Colors.teal.shade50,
                     shape: BoxShape.circle,
+                    color: const Color(0xFF0EA5E9).withOpacity(0.15),
+                    border: Border.all(color: const Color(0xFF0EA5E9), width: 2),
                   ),
-                  child: Icon(Icons.pets, size: 60, color: Colors.teal.shade700),
+                  child: const Icon(Icons.radar_sharp, size: 52, color: Color(0xFF0EA5E9)),
                 ),
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                'PetFinder Bogotá',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
-              ),
-              const Text(
-                'Plataforma de Monitoreo GPS Canino y Felino',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 13, color: Colors.grey),
-              ),
-              const SizedBox(height: 36),
+                const SizedBox(height: 16),
+                const Text(
+                  'PetFinder Bogotá',
+                  style: TextStyle(fontSize: 28, fontWeight: FontWeight.w800, color: Colors.white, letterSpacing: 0.5),
+                ),
+                const Text(
+                  'Plataforma IoT de Rastreo Mascota Satelital',
+                  style: TextStyle(fontSize: 12, color: Colors.grey),
+                ),
+                const Spacer(),
 
-              TextField(
-                controller: _emailController,
-                keyboardType: TextInputType.emailAddress,
-                decoration: const InputDecoration(
-                  labelText: 'Correo Electrónico',
-                  hintText: 'ejemplo@ecci.edu.co',
-                  prefixIcon: Icon(Icons.email_outlined),
-                  border: OutlineInputBorder(),
+                // Selector de Personas / Usuarios
+                const Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text('Seleccionar Perfil de Usuario:', style: TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.bold)),
                 ),
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: _passwordController,
-                obscureText: _obscurePassword,
-                decoration: InputDecoration(
-                  labelText: 'Contraseña',
-                  hintText: '••••••••',
-                  prefixIcon: const Icon(Icons.lock_outline),
-                  suffixIcon: IconButton(
-                    icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility),
-                    onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
-                  ),
-                  border: const OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.teal.shade700,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                  elevation: 2,
-                ),
-                onPressed: _handleManualLogin,
-                child: const Text('Iniciar Sesión', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-              ),
-              const SizedBox(height: 10),
-              OutlinedButton(
-                style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 14)),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const RegisterPetScreen()),
-                  );
-                },
-                child: const Text('Registrar Nueva Mascota / Collar GPS'),
-              ),
-
-              const SizedBox(height: 28),
-              const Row(
-                children: [
-                  Expanded(child: Divider()),
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 8.0),
-                    child: Text('O ENTRAR COMO JURADO', style: TextStyle(fontSize: 11, color: Colors.grey, fontWeight: FontWeight.bold)),
-                  ),
-                  Expanded(child: Divider()),
-                ],
-              ),
-              const SizedBox(height: 16),
-
-              Container(
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: Colors.amber.shade50,
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: Colors.amber.shade300),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(Icons.science, color: Colors.amber.shade900, size: 20),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            'Usuarios de Validación (Pruebas Fase 3)',
-                            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.amber.shade900, fontSize: 13),
+                const SizedBox(height: 10),
+                Row(
+                  children: List.generate(samplePets.length, (index) {
+                    final isSelected = _selectedUserIdx == index;
+                    final p = samplePets[index];
+                    return Expanded(
+                      child: GestureDetector(
+                        onTap: () => setState(() => _selectedUserIdx = index),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          margin: const EdgeInsets.symmetric(horizontal: 4),
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: isSelected ? const Color(0xFF0EA5E9).withOpacity(0.2) : const Color(0xFF131C2E),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: isSelected ? const Color(0xFF0EA5E9) : Colors.transparent,
+                              width: 2,
+                            ),
+                          ),
+                          child: Column(
+                            children: [
+                              CircleAvatar(
+                                radius: 18,
+                                backgroundColor: isSelected ? const Color(0xFF0EA5E9) : Colors.grey.shade800,
+                                child: Text(p.ownerName[0], style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                              ),
+                              const SizedBox(height: 6),
+                              Text(
+                                p.ownerName.split(' ')[0],
+                                style: TextStyle(color: isSelected ? Colors.white : Colors.grey, fontSize: 12, fontWeight: FontWeight.w600),
+                              ),
+                              Text('(${p.petName})', style: const TextStyle(color: Color(0xFF0EA5E9), fontSize: 10)),
+                            ],
                           ),
                         ),
-                      ],
-                    ),
-                    const SizedBox(height: 6),
-                    const Text(
-                      'Haz clic en un usuario para cargar su perfil y GPS único:',
-                      style: TextStyle(fontSize: 11, color: Colors.black87),
-                    ),
-                    const SizedBox(height: 10),
-                    ..._demoUsers.map((user) => Card(
-                          elevation: 1,
-                          margin: const EdgeInsets.symmetric(vertical: 4),
-                          child: ListTile(
-                            dense: true,
-                            leading: Icon(
-                              user.petType == 'Canino' ? Icons.pets : Icons.catching_pokemon,
-                              color: Colors.teal.shade700,
-                            ),
-                            title: Text(user.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
-                            subtitle: Text('${user.petName} (${user.breed}) • GPS: ${user.gpsId}', style: const TextStyle(fontSize: 11)),
-                            trailing: const Icon(Icons.arrow_forward_ios, size: 12),
-                            onTap: () => _login(user),
-                          ),
-                        )),
-                  ],
+                      ),
+                    );
+                  }),
                 ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
+                const SizedBox(height: 20),
 
-// ============================================================================
-// PANTALLA 2: REGISTRO DE PERFIL Y COLLAR GPS (HU-PET-001)
-// ============================================================================
-
-class RegisterPetScreen extends StatefulWidget {
-  const RegisterPetScreen({super.key});
-
-  @override
-  State<RegisterPetScreen> createState() => _RegisterPetScreenState();
-}
-
-class _RegisterPetScreenState extends State<RegisterPetScreen> {
-  final _formKey = GlobalKey<FormState>();
-  final _gpsController = TextEditingController();
-  final _petNameController = TextEditingController();
-  final _breedController = TextEditingController();
-  bool _isGpsValid = false;
-
-  void _validateGpsCode(String value) {
-    setState(() {
-      _isGpsValid = value.startsWith('GPS-BOG-') && value.length == 11;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Registrar Mascota (HU-PET-001)')),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              TextFormField(
-                controller: _petNameController,
-                decoration: const InputDecoration(
-                  labelText: 'Nombre de la Mascota',
-                  prefixIcon: Icon(Icons.pets),
-                  border: OutlineInputBorder(),
-                ),
-                validator: (val) => val == null || val.isEmpty ? 'Ingresa el nombre' : null,
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _breedController,
-                decoration: const InputDecoration(
-                  labelText: 'Raza / Especie',
-                  prefixIcon: Icon(Icons.category),
-                  border: OutlineInputBorder(),
-                ),
-                validator: (val) => val == null || val.isEmpty ? 'Ingresa la raza' : null,
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _gpsController,
-                onChanged: _validateGpsCode,
-                decoration: InputDecoration(
-                  labelText: 'ID del Collar GPS (ej. GPS-BOG-101)',
-                  prefixIcon: const Icon(Icons.qr_code_scanner),
-                  suffixIcon: Icon(
-                    _isGpsValid ? Icons.check_circle : Icons.error,
-                    color: _isGpsValid ? Colors.green : Colors.grey,
+                // Campo Credencial
+                TextField(
+                  controller: TextEditingController(text: pet.email),
+                  readOnly: true,
+                  decoration: InputDecoration(
+                    prefixIcon: const Icon(Icons.email_outlined, color: Color(0xFF0EA5E9)),
+                    filled: true,
+                    fillColor: const Color(0xFF131C2E),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
                   ),
-                  border: const OutlineInputBorder(),
-                  helperText: 'Formato requerido: GPS-BOG-XXX',
                 ),
-                validator: (val) => !_isGpsValid ? 'Código GPS inválido o duplicado' : null,
-              ),
-              const SizedBox(height: 24),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.teal.shade700,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: _passController,
+                  obscureText: true,
+                  decoration: InputDecoration(
+                    prefixIcon: const Icon(Icons.lock_outline, color: Color(0xFF0EA5E9)),
+                    suffixIcon: const Icon(Icons.visibility_off, color: Colors.grey),
+                    filled: true,
+                    fillColor: const Color(0xFF131C2E),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                  ),
                 ),
-                onPressed: () {
-                  if (_formKey.currentState!.validate()) {
-                    final newUser = UserModel(
-                      id: 'U99',
-                      name: 'Usuario Registrado',
-                      email: 'usuario@ejemplo.com',
-                      phone: '+57 300 000 0000',
-                      petName: _petNameController.text,
-                      petType: 'Canino',
-                      breed: _breedController.text,
-                      age: '1 año',
-                      weight: '10.0 kg',
-                      color: 'Mixto',
-                      gender: 'Macho',
-                      isVaccinated: true,
-                      gpsId: _gpsController.text,
-                      batteryLevel: 100,
-                      initialLat: 4.6097,
-                      initialLng: -74.0817,
-                      locationName: 'Plaza de Bolívar, Bogotá D.C.',
-                      distance: '2.0 km',
-                      duration: '30 min',
-                      pointCount: '80',
-                      routePoints: [
-                        RoutePoint(title: 'Inicio: Centro Bogotá', time: '10:00 AM', icon: Icons.play_circle_fill, color: Colors.green),
-                        RoutePoint(title: 'Fin: Plaza de Bolívar', time: '10:30 AM', icon: Icons.stop_circle, color: Colors.red),
-                      ],
-                    );
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Mascota y collar GPS vinculados exitosamente.')),
-                    );
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(builder: (context) => MainNavigationScreen(currentUser: newUser)),
-                    );
-                  }
-                },
-                child: const Text('Guardar y Comenzar Rastreo', style: TextStyle(color: Colors.white)),
-              ),
-            ],
+                const SizedBox(height: 24),
+
+                // Botón Ingreso
+                SizedBox(
+                  width: double.infinity,
+                  height: 52,
+                  child: ElevatedButton(
+                    onPressed: _isLoading ? null : _login,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF0EA5E9),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    child: _isLoading
+                        ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                        : const Text('INGRESAR AL SISTEMA', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15)),
+                  ),
+                ),
+                const Spacer(),
+                const Text('Bogotá D.C. • Edición Académica Exposición', style: TextStyle(color: Colors.white30, fontSize: 11)),
+                const SizedBox(height: 12),
+              ],
+            ),
           ),
         ),
       ),
@@ -482,510 +331,538 @@ class _RegisterPetScreenState extends State<RegisterPetScreen> {
 }
 
 // ============================================================================
-// NAVEGACIÓN PRINCIPAL
+// PANTALLA 2: DASHBOARD PRINCIPAL Y NAVEGACIÓN
 // ============================================================================
-
-class MainNavigationScreen extends StatefulWidget {
-  final UserModel currentUser;
-
-  const MainNavigationScreen({super.key, required this.currentUser});
+class MainDashboardScreen extends StatefulWidget {
+  final int selectedPetIndex;
+  const MainDashboardScreen({super.key, required this.selectedPetIndex});
 
   @override
-  State<MainNavigationScreen> createState() => _MainNavigationScreenState();
+  State<MainDashboardScreen> createState() => _MainDashboardScreenState();
 }
 
-class _MainNavigationScreenState extends State<MainNavigationScreen> {
-  int _currentIndex = 0;
-
-  @override
-  Widget build(BuildContext context) {
-    final List<Widget> pages = [
-      TrackingMapScreen(user: widget.currentUser),
-      HistoryRouteScreen(user: widget.currentUser),
-      UserProfileScreen(user: widget.currentUser),
-    ];
-
-    return Scaffold(
-      body: IndexedStack(
-        index: _currentIndex,
-        children: pages,
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        selectedItemColor: Colors.teal.shade700,
-        onTap: (index) => setState(() => _currentIndex = index),
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.map_outlined), activeIcon: Icon(Icons.map), label: 'Mapa en Vivo'),
-          BottomNavigationBarItem(icon: Icon(Icons.route_outlined), activeIcon: Icon(Icons.route), label: 'Historial Rutas'),
-          BottomNavigationBarItem(icon: Icon(Icons.pets_outlined), activeIcon: Icon(Icons.pets), label: 'Perfil Mascota'),
-        ],
-      ),
-    );
-  }
-}
-
-// ============================================================================
-// PANTALLA 3: MAPA EN TIEMPO REAL DINÁMICO
-// ============================================================================
-
-class TrackingMapScreen extends StatefulWidget {
-  final UserModel user;
-
-  const TrackingMapScreen({super.key, required this.user});
-
-  @override
-  State<TrackingMapScreen> createState() => _TrackingMapScreenState();
-}
-
-class _TrackingMapScreenState extends State<TrackingMapScreen> {
-  late double _currentLat;
-  late double _currentLng;
-  bool _isConnected = true;
-  int _lastReportMinutes = 0;
-  Timer? _locationTimer;
+class _MainDashboardScreenState extends State<MainDashboardScreen> {
+  late int _selectedPetIndex;
+  int _currentTab = 0;
+  bool _isGpsActive = true;
+  bool _isSimulating = false;
+  double _animProgress = 1.0;
 
   @override
   void initState() {
     super.initState();
-    _currentLat = widget.user.initialLat;
-    _currentLng = widget.user.initialLng;
-
-    _locationTimer = Timer.periodic(const Duration(seconds: 3), (timer) {
-      if (_isConnected) {
-        setState(() {
-          _currentLat += 0.0001;
-          _currentLng += 0.0001;
-        });
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _locationTimer?.cancel();
-    super.dispose();
-  }
-
-  void _toggleSignal() {
-    setState(() {
-      _isConnected = !_isConnected;
-      if (!_isConnected) {
-        _lastReportMinutes = 4;
-      }
-    });
-  }
-
-  void _recenterMap() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Cámara re-centrada en: ${_currentLat.toStringAsFixed(4)}, ${_currentLng.toStringAsFixed(4)}'),
-        duration: const Duration(seconds: 1),
-      ),
-    );
+    _selectedPetIndex = widget.selectedPetIndex;
   }
 
   @override
   Widget build(BuildContext context) {
+    final pet = samplePets[_selectedPetIndex];
+
     return Scaffold(
       appBar: AppBar(
-        title: Text('Monitoreo: ${widget.user.petName}'),
-        actions: [
-          IconButton(
-            icon: Icon(_isConnected ? Icons.wifi : Icons.wifi_off, color: _isConnected ? Colors.green : Colors.red),
-            tooltip: 'Simular Corte de Señal GPS',
-            onPressed: _toggleSignal,
-          )
-        ],
-      ),
-      body: Stack(
-        children: [
-          Container(
-            color: const Color(0xFFE2E8F0),
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(22),
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                      boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 12)],
-                    ),
-                    child: Icon(
-                      Icons.pets,
-                      size: 52,
-                      color: _isConnected ? Colors.teal.shade700 : Colors.red,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Chip(
-                    avatar: Icon(Icons.location_on, color: _isConnected ? Colors.teal.shade700 : Colors.red),
-                    label: Text(
-                      'Lat: ${_currentLat.toStringAsFixed(4)} | Lng: ${_currentLng.toStringAsFixed(4)}',
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    widget.user.locationName,
-                    style: TextStyle(color: Colors.grey.shade800, fontWeight: FontWeight.bold),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          Positioned(
-            top: 10,
-            left: 16,
-            right: 16,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              decoration: BoxDecoration(
-                color: _isConnected ? const Color(0xFF059669) : const Color(0xFFDC2626),
-                borderRadius: BorderRadius.circular(8),
-                boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 4)],
-              ),
-              child: Row(
-                children: [
-                  Icon(_isConnected ? Icons.check_circle : Icons.warning_amber_rounded, color: Colors.white),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      _isConnected
-                          ? 'Estado: Transmitiendo en Tiempo Real'
-                          : 'Sin señal — Último reporte hace $_lastReportMinutes min',
-                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _recenterMap,
-        backgroundColor: Colors.teal.shade700,
-        icon: const Icon(Icons.my_location, color: Colors.white),
-        label: const Text('Re-centrar', style: TextStyle(color: Colors.white)),
-      ),
-    );
-  }
-}
-
-// ============================================================================
-// PANTALLA 4: HISTORIAL DE RUTAS DINÁMICO
-// ============================================================================
-
-class HistoryRouteScreen extends StatefulWidget {
-  final UserModel user;
-
-  const HistoryRouteScreen({super.key, required this.user});
-
-  @override
-  State<HistoryRouteScreen> createState() => _HistoryRouteScreenState();
-}
-
-class _HistoryRouteScreenState extends State<HistoryRouteScreen> {
-  DateTime _selectedDate = DateTime.now();
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Historial de Trayectorias')),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
+        backgroundColor: const Color(0xFF131C2E),
+        elevation: 0,
+        title: Row(
           children: [
-            Card(
-              child: ListTile(
-                leading: Icon(Icons.calendar_today, color: Colors.teal.shade700),
-                title: Text('Fecha: ${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}'),
-                subtitle: const Text('Filtro por Rango Horario: 08:00 AM - 12:00 PM'),
-                trailing: const Icon(Icons.edit),
-                onTap: () async {
-                  final picked = await showDatePicker(
-                    context: context,
-                    initialDate: _selectedDate,
-                    firstDate: DateTime(2026, 1),
-                    lastDate: DateTime.now(),
-                  );
-                  if (picked != null) setState(() => _selectedDate = picked);
-                },
-              ),
-            ),
-            const SizedBox(height: 16),
-            Expanded(
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.grey.shade300),
-                ),
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Resumen del Recorrido (${widget.user.petName}):',
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                    const SizedBox(height: 12),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        _MetricTile(label: 'Distancia', value: widget.user.distance, icon: Icons.straighten),
-                        _MetricTile(label: 'Tiempo', value: widget.user.duration, icon: Icons.timer),
-                        _MetricTile(label: 'Puntos GPS', value: widget.user.pointCount, icon: Icons.pin_drop),
-                      ],
-                    ),
-                    const Divider(height: 32),
-                    const Text('Puntos de Referencia Registrados:', style: TextStyle(fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 8),
-                    Expanded(
-                      child: ListView.builder(
-                        itemCount: widget.user.routePoints.length,
-                        itemBuilder: (context, index) {
-                          final point = widget.user.routePoints[index];
-                          return ListTile(
-                            dense: true,
-                            leading: Icon(point.icon, color: point.color),
-                            title: Text(point.title),
-                            subtitle: Text(point.time),
-                          );
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+            const Icon(Icons.location_searching, color: Color(0xFF0EA5E9), size: 22),
+            const SizedBox(width: 10),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('PetFinder (${pet.petName})', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                Text(pet.ownerName, style: const TextStyle(color: Colors.grey, fontSize: 11)),
+              ],
             ),
           ],
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.swap_horiz, color: Color(0xFF0EA5E9)),
+            tooltip: 'Cambiar de Perfil',
+            onPressed: () {
+              setState(() {
+                _selectedPetIndex = (_selectedPetIndex + 1) % samplePets.length;
+                _animProgress = 1.0;
+              });
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.logout, color: Colors.redAccent),
+            onPressed: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const AuthenticationScreen()),
+              );
+            },
+          ),
+        ],
       ),
+      body: IndexedStack(
+        index: _currentTab,
+        children: [
+          _buildMapTab(pet),
+          _buildHealthProfileTab(pet),
+          _buildRouteHistoryTab(pet),
+        ],
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _currentTab,
+        onTap: (idx) => setState(() => _currentTab = idx),
+        backgroundColor: const Color(0xFF131C2E),
+        selectedItemColor: const Color(0xFF0EA5E9),
+        unselectedItemColor: Colors.grey,
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.map_outlined), activeIcon: Icon(Icons.map), label: 'Mapa GPS'),
+          BottomNavigationBarItem(icon: Icon(Icons.pets_outlined), activeIcon: Icon(Icons.pets), label: 'Ficha Mascota'),
+          BottomNavigationBarItem(icon: Icon(Icons.history), activeIcon: Icon(Icons.manage_history), label: 'Historial'),
+        ],
+      ),
+    );
+  }
+
+  // ==========================================================================
+  // TAB 1: MAPA GPS CON MAPAS EXCLUSIVOS POR UBICACIÓN
+  // ==========================================================================
+  Widget _buildMapTab(PetProfile pet) {
+    return Column(
+      children: [
+        // Barra Superior de Telemetría
+        Container(
+          color: const Color(0xFF1E293B),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          child: Row(
+            children: [
+              Container(
+                width: 10,
+                height: 10,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: _isGpsActive ? Colors.green : Colors.red,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  pet.lastSeenZone,
+                  style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w500),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              Text(
+                'GPS: ${_isGpsActive ? "ONLINE" : "CORTE"}',
+                style: TextStyle(color: _isGpsActive ? Colors.green : Colors.red, fontSize: 11, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(width: 8),
+              Switch(
+                value: _isGpsActive,
+                activeColor: const Color(0xFF10B981),
+                onChanged: (val) => setState(() => _isGpsActive = val),
+              ),
+            ],
+          ),
+        ),
+
+        // Lienzo del Mapa Único
+        Expanded(
+          child: Stack(
+            children: [
+              Positioned.fill(
+                child: CustomPaint(
+                  painter: CustomBogotaMapPainter(
+                    mapType: pet.mapType,
+                    routePoints: pet.routePoints,
+                    isGpsActive: _isGpsActive,
+                    progress: _animProgress,
+                  ),
+                ),
+              ),
+
+              // Panel Telemetría Flotante
+              Positioned(
+                top: 12,
+                left: 12,
+                right: 12,
+                child: Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF090D16).withOpacity(0.85),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.white10),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      _TelemetryMetric(icon: Icons.battery_charging_full, label: 'Batería', value: '${pet.batteryLevel}%', color: pet.batteryLevel > 20 ? Colors.green : Colors.red),
+                      _TelemetryMetric(icon: Icons.my_location, label: 'Precisión', value: _isGpsActive ? '± 2.5m' : 'Sin señal', color: const Color(0xFF0EA5E9)),
+                      _TelemetryMetric(icon: Icons.thermostat, label: 'Temp. Collar', value: '24 °C', color: Colors.amber),
+                    ],
+                  ),
+                ),
+              ),
+
+              // Botón de Animación de Recorrido
+              Positioned(
+                bottom: 16,
+                right: 16,
+                child: FloatingActionButton.extended(
+                  backgroundColor: const Color(0xFF0EA5E9),
+                  icon: Icon(_isSimulating ? Icons.pause : Icons.play_arrow, color: Colors.white),
+                  label: Text(_isSimulating ? 'Pausar' : 'Simular Recorrido', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                  onPressed: () {
+                    setState(() {
+                      _isSimulating = !_isSimulating;
+                      if (_isSimulating) _startLoop();
+                    });
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _startLoop() async {
+    while (_isSimulating) {
+      await Future.delayed(const Duration(milliseconds: 80));
+      if (!mounted) return;
+      setState(() {
+        _animProgress += 0.02;
+        if (_animProgress > 1.0) _animProgress = 0.1;
+      });
+    }
+  }
+
+  // ==========================================================================
+  // TAB 2: FICHA TÉCNICA Y SALUD
+  // ==========================================================================
+  Widget _buildHealthProfileTab(PetProfile pet) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header Card
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: const Color(0xFF131C2E),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.white10),
+            ),
+            child: Row(
+              children: [
+                CircleAvatar(
+                  radius: 36,
+                  backgroundColor: const Color(0xFF0EA5E9).withOpacity(0.2),
+                  child: Icon(pet.petType == 'Canino' ? Icons.pets : Icons.catching_pokemon, size: 40, color: const Color(0xFF0EA5E9)),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(pet.petName, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white)),
+                      Text('${pet.breed} • ${pet.petType}', style: const TextStyle(color: Colors.grey, fontSize: 13)),
+                      const SizedBox(height: 6),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                        decoration: BoxDecoration(color: const Color(0xFF10B981).withOpacity(0.2), borderRadius: BorderRadius.circular(6)),
+                        child: Text('Hardware ID: ${pet.gpsHardwareId}', style: const TextStyle(color: Color(0xFF10B981), fontSize: 11, fontWeight: FontWeight.bold)),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 18),
+
+          const Text('Biometría Registrada', style: TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 10),
+          GridView.count(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            crossAxisCount: 2,
+            childAspectRatio: 2.3,
+            crossAxisSpacing: 10,
+            mainAxisSpacing: 10,
+            children: [
+              _BiometricItem(label: 'Edad', value: pet.age, icon: Icons.cake),
+              _BiometricItem(label: 'Peso Corporal', value: pet.weight, icon: Icons.monitor_weight),
+              _BiometricItem(label: 'Color Pelaje', value: pet.color, icon: Icons.palette),
+              _BiometricItem(label: 'Sexo', value: pet.gender, icon: Icons.wc),
+            ],
+          ),
+          const SizedBox(height: 18),
+
+          // Tarjeta de Vacunación
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: pet.isVaccinated ? const Color(0xFF10B981).withOpacity(0.12) : Colors.red.withOpacity(0.12),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: pet.isVaccinated ? Colors.green : Colors.red),
+            ),
+            child: Row(
+              children: [
+                Icon(pet.isVaccinated ? Icons.verified : Icons.warning_amber, color: pet.isVaccinated ? Colors.green : Colors.red, size: 28),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        pet.isVaccinated ? 'Vacunación y Desparasitación AL DÍA' : 'Vacunación PENDIENTE',
+                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
+                      ),
+                      Text(
+                        pet.isVaccinated ? 'Carnet digital verificado por clínica veterinaria.' : 'Refuerzo de Rabia y Pentavalente requerido.',
+                        style: const TextStyle(color: Colors.grey, fontSize: 11),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 18),
+
+          const Text('Contacto de Emergencia', style: TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 8),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(color: const Color(0xFF131C2E), borderRadius: BorderRadius.circular(12)),
+            child: ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: const CircleAvatar(backgroundColor: Color(0xFF0EA5E9), child: Icon(Icons.person, color: Colors.white)),
+              title: Text(pet.ownerName, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+              subtitle: Text('${pet.phone}\n${pet.email}', style: const TextStyle(color: Colors.grey, fontSize: 12)),
+              trailing: IconButton(icon: const Icon(Icons.phone, color: Color(0xFF10B981)), onPressed: () {}),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ==========================================================================
+  // TAB 3: HISTORIAL DE RUTAS
+  // ==========================================================================
+  Widget _buildRouteHistoryTab(PetProfile pet) {
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        const Text('Puntos de Rastreo Recientes', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+        const SizedBox(height: 12),
+        _HistoryTile(title: pet.lastSeenZone, coords: pet.coordsText, time: 'Hace 2 minutos', isLive: true),
+        const _HistoryTile(title: 'Punto de descanso (Parque Canino)', coords: '4.6640° N, 74.0520° W', time: 'Hoy, 09:15 AM', isLive: false),
+        const _HistoryTile(title: 'Salida de residencia', coords: '4.6610° N, 74.0501° W', time: 'Hoy, 08:00 AM', isLive: false),
+      ],
     );
   }
 }
 
-class _MetricTile extends StatelessWidget {
+// ============================================================================
+// DIBUJO VECTORIAL DIVERSIFICADO DE MAPAS EN BOGOTÁ
+// ============================================================================
+class CustomBogotaMapPainter extends CustomPainter {
+  final int mapType; // 0: Zona T, 1: Chapinero Alto, 2: Simón Bolívar
+  final List<Offset> routePoints;
+  final bool isGpsActive;
+  final double progress;
+
+  CustomBogotaMapPainter({
+    required this.mapType,
+    required this.routePoints,
+    required this.isGpsActive,
+    required this.progress,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final bgPaint = Paint()..color = const Color(0xFF0B111E);
+    canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), bgPaint);
+
+    if (mapType == 0) {
+      // ----------------------------------------------------------------------
+      // MAPA 0: ZONA T / ZONA ROSA (Cuadrícula Comercial y Avenidas Rectas)
+      // ----------------------------------------------------------------------
+      final blockPaint = Paint()..color = const Color(0xFF132035);
+      for (double x = 15; x < size.width; x += 55) {
+        for (double y = 15; y < size.height; y += 65) {
+          canvas.drawRRect(RRect.fromRectAndRadius(Rect.fromLTWH(x, y, 42, 52), const Radius.circular(4)), blockPaint);
+        }
+      }
+
+      // Cra 11 y Cll 82
+      final roadPaint = Paint()
+        ..color = const Color(0xFF24344D)
+        ..strokeWidth = 14
+        ..style = PaintingStyle.stroke;
+      canvas.drawLine(Offset(size.width * 0.45, 0), Offset(size.width * 0.45, size.height), roadPaint);
+      canvas.drawLine(Offset(0, size.height * 0.5), Offset(size.width, size.height * 0.5), roadPaint);
+
+      // Zona Peatonal T (Verde)
+      final zoneTPaint = Paint()..color = const Color(0xFF059669).withOpacity(0.35);
+      canvas.drawRect(Rect.fromLTWH(size.width * 0.35, size.height * 0.42, 100, 50), zoneTPaint);
+
+    } else if (mapType == 1) {
+      // ----------------------------------------------------------------------
+      // MAPA 1: CHAPINERO ALTO (Montaña y Curvas de Nivel Urbano)
+      // ----------------------------------------------------------------------
+      final hillPaint = Paint()
+        ..color = const Color(0xFF064E3B).withOpacity(0.25)
+        ..style = PaintingStyle.fill;
+      final pathHill = Path();
+      pathHill.moveTo(size.width * 0.4, 0);
+      pathHill.quadraticBezierTo(size.width * 0.8, size.height * 0.4, size.width, size.height * 0.9);
+      pathHill.lineTo(size.width, 0);
+      canvas.drawPath(pathHill, hillPaint);
+
+      // Calles con curvas empinadas
+      final curveRoadPaint = Paint()
+        ..color = const Color(0xFF1E293B)
+        ..strokeWidth = 10
+        ..style = PaintingStyle.stroke;
+
+      final pathRoad = Path();
+      pathRoad.moveTo(0, size.height * 0.2);
+      pathRoad.cubicTo(size.width * 0.4, size.height * 0.1, size.width * 0.5, size.height * 0.6, size.width, size.height * 0.8);
+      canvas.drawPath(pathRoad, curveRoadPaint);
+
+    } else {
+      // ----------------------------------------------------------------------
+      // MAPA 2: PARQUE METROPOLITANO SIMÓN BOLÍVAR (Lago Central y Naturaleza)
+      // ----------------------------------------------------------------------
+      // Fondo de Parque Gigante
+      final parkBg = Paint()..color = const Color(0xFF022C22);
+      canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), parkBg);
+
+      // Lago Simón Bolívar (Azul)
+      final lakePaint = Paint()..color = const Color(0xFF0284C7).withOpacity(0.6);
+      canvas.drawOval(Rect.fromLTWH(size.width * 0.25, size.height * 0.3, size.width * 0.5, size.height * 0.35), lakePaint);
+
+      // Circuito Perimetral de Trote
+      final trackPaint = Paint()
+        ..color = const Color(0xFFD97706).withOpacity(0.6)
+        ..strokeWidth = 6
+        ..style = PaintingStyle.stroke;
+      canvas.drawOval(Rect.fromLTWH(size.width * 0.15, size.height * 0.2, size.width * 0.7, size.height * 0.55), trackPaint);
+    }
+
+    // ------------------------------------------------------------------------
+    // DIBUJO DE LA TRAYECTORIA Y DEL COLLAR GPS
+    // ------------------------------------------------------------------------
+    if (routePoints.isNotEmpty) {
+      final points = routePoints.map((p) => Offset(p.dx * size.width, p.dy * size.height)).toList();
+
+      final routeLine = Path()..moveTo(points.first.dx, points.first.dy);
+      for (int i = 1; i < points.length; i++) {
+        routeLine.lineTo(points[i].dx, points[i].dy);
+      }
+
+      final linePaint = Paint()
+        ..color = isGpsActive ? const Color(0xFF0EA5E9) : Colors.redAccent
+        ..strokeWidth = 4
+        ..style = PaintingStyle.stroke;
+      canvas.drawPath(routeLine, linePaint);
+
+      final idx = ((points.length - 1) * progress).clamp(0, points.length - 1).toInt();
+      final currentPos = points[idx];
+
+      if (isGpsActive) {
+        canvas.drawCircle(currentPos, 20, Paint()..color = const Color(0xFF0EA5E9).withOpacity(0.25));
+        canvas.drawCircle(currentPos, 8, Paint()..color = const Color(0xFF0EA5E9));
+        canvas.drawCircle(currentPos, 4, Paint()..color = Colors.white);
+      } else {
+        canvas.drawCircle(currentPos, 12, Paint()..color = Colors.red);
+        canvas.drawCircle(currentPos, 5, Paint()..color = Colors.white);
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomBogotaMapPainter oldDelegate) => true;
+}
+
+// ============================================================================
+// COMPONENTES AUXILIARES DE UI
+// ============================================================================
+class _TelemetryMetric extends StatelessWidget {
+  final IconData icon;
   final String label;
   final String value;
-  final IconData icon;
+  final Color color;
 
-  const _MetricTile({required this.label, required this.value, required this.icon});
+  const _TelemetryMetric({required this.icon, required this.label, required this.value, required this.color});
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Icon(icon, color: Colors.teal.shade700),
-        const SizedBox(height: 4),
-        Text(value, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-        Text(label, style: const TextStyle(color: Colors.grey, fontSize: 12)),
+        Icon(icon, color: color, size: 18),
+        const SizedBox(height: 2),
+        Text(label, style: const TextStyle(color: Colors.grey, fontSize: 10)),
+        Text(value, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
       ],
     );
   }
 }
 
-// ============================================================================
-// PANTALLA 5: PERFIL DETALLADO Y PROFESIONAL DE LA MASCOTA
-// ============================================================================
-
-class UserProfileScreen extends StatelessWidget {
-  final UserModel user;
-
-  const UserProfileScreen({super.key, required this.user});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Perfil Completo del Animal')),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Center(
-                child: Column(
-                  children: [
-                    Stack(
-                      alignment: Alignment.bottomRight,
-                      children: [
-                        CircleAvatar(
-                          radius: 46,
-                          backgroundColor: Colors.teal.shade100,
-                          child: Icon(
-                            user.petType == 'Canino' ? Icons.pets : Icons.catching_pokemon,
-                            size: 50,
-                            color: Colors.teal.shade800,
-                          ),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.all(4),
-                          decoration: const BoxDecoration(color: Colors.green, shape: BoxShape.circle),
-                          child: const Icon(Icons.check, size: 16, color: Colors.white),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      user.petName,
-                      style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
-                    ),
-                    Text(
-                      '${user.breed} • ${user.petType}',
-                      style: TextStyle(fontSize: 14, color: Colors.grey.shade600, fontWeight: FontWeight.w500),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 24),
-
-              const Text('Ficha Técnica de la Mascota', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-              const SizedBox(height: 10),
-              GridView.count(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                crossAxisCount: 2,
-                childAspectRatio: 2.3,
-                crossAxisSpacing: 10,
-                mainAxisSpacing: 10,
-                children: [
-                  _InfoCard(label: 'Edad', value: user.age, icon: Icons.cake_outlined),
-                  _InfoCard(label: 'Peso', value: user.weight, icon: Icons.scale_outlined),
-                  _InfoCard(label: 'Color Pelaje', value: user.color, icon: Icons.palette_outlined),
-                  _InfoCard(label: 'Sexo', value: user.gender, icon: Icons.wc),
-                ],
-              ),
-              const SizedBox(height: 16),
-
-              Card(
-                elevation: 1,
-                color: Colors.green.shade50,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  side: BorderSide(color: Colors.green.shade200),
-                ),
-                child: ListTile(
-                  leading: const Icon(Icons.verified, color: Colors.green),
-                  title: const Text('Estado Sanitario', style: TextStyle(fontWeight: FontWeight.bold)),
-                  subtitle: Text(user.isVaccinated ? 'Carné de vacunas al día (Rabia y Parvovirus)' : 'Vacunación pendiente'),
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              const Text('Dispositivo de Geolocalización', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-              const SizedBox(height: 8),
-              Card(
-                elevation: 1,
-                child: Padding(
-                  padding: const EdgeInsets.all(12.0),
-                  child: Column(
-                    children: [
-                      ListTile(
-                        dense: true,
-                        leading: Icon(Icons.gps_fixed, color: Colors.teal.shade700),
-                        title: const Text('ID de Hardware / Collar'),
-                        subtitle: Text(user.gpsId, style: const TextStyle(fontWeight: FontWeight.bold)),
-                      ),
-                      const Divider(),
-                      ListTile(
-                        dense: true,
-                        leading: Icon(
-                          user.batteryLevel > 20 ? Icons.battery_charging_full : Icons.battery_alert,
-                          color: user.batteryLevel > 20 ? Colors.green : Colors.red,
-                        ),
-                        title: const Text('Nivel de Batería del Collar'),
-                        subtitle: Text('${user.batteryLevel}% restante'),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              const Text('Datos del Propietario / Contacto', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-              const SizedBox(height: 8),
-              Card(
-                elevation: 1,
-                child: Column(
-                  children: [
-                    ListTile(
-                      dense: true,
-                      leading: Icon(Icons.person, color: Colors.teal.shade700),
-                      title: Text(user.name),
-                      subtitle: const Text('Propietario Responsable'),
-                    ),
-                    ListTile(
-                      dense: true,
-                      leading: Icon(Icons.phone, color: Colors.teal.shade700),
-                      title: Text(user.phone),
-                      subtitle: const Text('Contacto de Emergencia'),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 28),
-
-              ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red.shade600,
-                  foregroundColor: Colors.white,
-                  minimumSize: const Size.fromHeight(48),
-                ),
-                icon: const Icon(Icons.logout),
-                label: const Text('Cerrar Sesión'),
-                onPressed: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (context) => const LoginScreen()),
-                  );
-                },
-              ),
-              const SizedBox(height: 20),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _InfoCard extends StatelessWidget {
+class _BiometricItem extends StatelessWidget {
   final String label;
   final String value;
   final IconData icon;
 
-  const _InfoCard({required this.label, required this.value, required this.icon});
+  const _BiometricItem({required this.label, required this.value, required this.icon});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey.shade300),
-      ),
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(color: const Color(0xFF131C2E), borderRadius: BorderRadius.circular(10)),
       child: Row(
         children: [
-          Icon(icon, size: 22, color: Colors.teal.shade700),
+          Icon(icon, color: const Color(0xFF0EA5E9), size: 20),
           const SizedBox(width: 8),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(label, style: TextStyle(fontSize: 11, color: Colors.grey.shade600)),
-                Text(
-                  value,
-                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-                  overflow: TextOverflow.ellipsis,
-                ),
+                Text(label, style: const TextStyle(color: Colors.grey, fontSize: 10)),
+                Text(value, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12), overflow: TextOverflow.ellipsis),
               ],
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _HistoryTile extends StatelessWidget {
+  final String title;
+  final String coords;
+  final String time;
+  final bool isLive;
+
+  const _HistoryTile({required this.title, required this.coords, required this.time, required this.isLive});
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      color: const Color(0xFF131C2E),
+      margin: const EdgeInsets.only(bottom: 10),
+      child: ListTile(
+        leading: CircleAvatar(
+          backgroundColor: isLive ? const Color(0xFF0EA5E9).withOpacity(0.2) : Colors.white10,
+          child: Icon(Icons.location_on, color: isLive ? const Color(0xFF0EA5E9) : Colors.grey),
+        ),
+        title: Text(title, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
+        subtitle: Text('$coords • $time', style: const TextStyle(color: Colors.grey, fontSize: 11)),
       ),
     );
   }
